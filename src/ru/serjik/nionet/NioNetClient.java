@@ -6,40 +6,47 @@ import java.nio.channels.SocketChannel;
 
 public class NioNetClient
 {
-	public static final int STATE_CONNECTING = 0;
-	public static final int STATE_CONNECTED = 1;
-	public static final int STATE_DISCONNECTED = 2;
+	public static final int STATE_NONE = 0;
+	public static final int STATE_CONNECTING = 1;
+	public static final int STATE_CONNECTED = 2;
+	public static final int STATE_DISCONNECTED = 3;
 
 	private ClientData clientData;
 	private SocketChannel socket;
-	public int state = STATE_CONNECTING;
+	public int state = STATE_NONE;
 
 	private NioNetClientListener clientListener;
+	private String host;
+	private int port;
 
 	public NioNetClient(String host, int port, NioNetClientListener clientListener)
 	{
 		this.clientListener = clientListener;
-
-		try
-		{
-			socket = SocketChannel.open();
-			socket.configureBlocking(false);
-			socket.socket().setTcpNoDelay(true);
-			socket.socket().setKeepAlive(true);
-			socket.connect(new InetSocketAddress(host, port));
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			state = STATE_DISCONNECTED;
-			clientListener.onDisconnect();
-		}
+		this.host = host;
+		this.port = port;
 	}
 
 	public void tick()
 	{
 		switch (state)
 		{
+		case STATE_NONE:
+			try
+			{
+				socket = SocketChannel.open();
+				socket.configureBlocking(false);
+				socket.socket().setTcpNoDelay(true);
+				socket.socket().setKeepAlive(true);
+				socket.connect(new InetSocketAddress(host, port));
+				state = STATE_CONNECTING;
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				state = STATE_DISCONNECTED;
+				clientListener.onDisconnect();
+			}
+
 		case STATE_CONNECTING:
 			try
 			{
@@ -76,8 +83,20 @@ public class NioNetClient
 			}
 			break;
 
-		case 2:
+		case STATE_DISCONNECTED:
 			break;
+		}
+	}
+	
+	public void close()
+	{
+		try
+		{
+			socket.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
 		}
 	}
 
