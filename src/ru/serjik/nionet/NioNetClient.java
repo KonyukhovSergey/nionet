@@ -42,7 +42,7 @@ public class NioNetClient
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				//e.printStackTrace();
 				state = STATE_DISCONNECTED;
 				clientListener.onDisconnect();
 			}
@@ -59,7 +59,7 @@ public class NioNetClient
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				//e.printStackTrace();
 				state = STATE_DISCONNECTED;
 			}
 			break;
@@ -77,7 +77,7 @@ public class NioNetClient
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				// e.printStackTrace();
 				state = STATE_DISCONNECTED;
 				clientListener.onDisconnect();
 			}
@@ -96,7 +96,7 @@ public class NioNetClient
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 

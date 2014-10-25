@@ -17,7 +17,7 @@ public class ClientData
 	private SocketChannel socket;
 	private Queue<String> messages = new LinkedList<String>();
 
-	public Object tag;
+	public MessageListener tag;
 
 	public ClientData(SocketChannel socket)
 	{
@@ -28,14 +28,14 @@ public class ClientData
 	public void close()
 	{
 		messages.clear();
-		
+
 		try
 		{
 			socket.close();
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
@@ -51,7 +51,7 @@ public class ClientData
 			messages.add(message);
 		}
 	}
-	
+
 	public void send() throws IOException
 	{
 		if (sendBuffer.hasRemaining())
