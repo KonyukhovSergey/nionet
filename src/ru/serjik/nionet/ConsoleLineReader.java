@@ -5,31 +5,39 @@ import java.io.InputStream;
 
 public class ConsoleLineReader
 {
-	public static final String read(InputStream stream) throws IOException
+	public static final String read(InputStream stream)
 	{
-		String ls = System.getProperty("line.separator");
+		try
+		{
+			String ls = System.getProperty("line.separator");
 
-		if (stream.available() > ls.length())
-		{
-			byte[] data = new byte[stream.available()];
-			int pos =0;
-			
-			while(stream.available()>0)
+			if (stream.available() > ls.length())
 			{
-				int value = stream.read();
-				if(value!=10 && value!=13)
+				byte[] data = new byte[stream.available()];
+				int pos = 0;
+
+				while (stream.available() > 0)
 				{
-					data[pos] = (byte) value;
-					pos++;
+					int value = stream.read();
+					if (value != 10 && value != 13)
+					{
+						data[pos] = (byte) value;
+						pos++;
+					}
 				}
+
+				return new String(data, 0, pos);
 			}
-			
-			return new String(data, 0, pos);
+			else
+			{
+				stream.skip(stream.available());
+			}
 		}
-		else
+		catch (IOException e)
 		{
-			stream.skip(stream.available());
+
 		}
+
 		return "";
 	}
 }
