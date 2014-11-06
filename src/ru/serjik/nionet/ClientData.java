@@ -15,7 +15,6 @@ public class ClientData
 	private BufferReader reader = new BufferReader(BUFFER_SIZE);
 
 	private SocketChannel socket;
-	private Queue<String> messages = new LinkedList<String>();
 
 	public MessageListener tag;
 
@@ -84,14 +83,11 @@ public class ClientData
 		{
 			buffer.limit(count);
 
-			String line;
+			int size;
 
-			while ((line = reader.read(buffer)) != null)
+			while ((size = reader.read(buffer)) > 0)
 			{
-				if (line.length() > 0)
-				{
-					messageListener.onMessage(this, line);
-				}
+				messageListener.onMessage(this, new String(reader.data(), 0, size, charset));
 			}
 		}
 

@@ -1,15 +1,12 @@
 package ru.serjik.nionet;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 public class BufferReader
 {
 	private static final int STATE_LENGTH = 1;
 	private static final int STATE_DATA = 2;
 	private static final int STATE_CHECKSUMM = 3;
-
-	private static final Charset utf8 = Charset.forName("UTF-8");
 
 	private byte[] data;
 	private int size = 0;
@@ -23,7 +20,12 @@ public class BufferReader
 		data = new byte[capacity];
 	}
 
-	public String read(ByteBuffer buffer)
+	public byte[] data()
+	{
+		return data;
+	}
+
+	public int read(ByteBuffer buffer)
 	{
 		while (buffer.remaining() > 0)
 		{
@@ -35,7 +37,7 @@ public class BufferReader
 				blockLength = value;
 				if (blockLength == 0)
 				{
-					String result = new String(data, 0, size, utf8);
+					int result = size;
 					size = 0;
 					return result;
 				}
@@ -67,7 +69,6 @@ public class BufferReader
 			}
 		}
 
-		return null;
+		return 0;
 	}
-
 }
