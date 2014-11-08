@@ -4,7 +4,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-public class LoopBuffer
+public class BufferQueue
 {
 	private byte[] buffer;
 
@@ -12,7 +12,7 @@ public class LoopBuffer
 	private int writed = 0;
 	private int used = 0;
 
-	public LoopBuffer(int maximumCapacity)
+	public BufferQueue(int maximumCapacity)
 	{
 		buffer = new byte[maximumCapacity];
 	}

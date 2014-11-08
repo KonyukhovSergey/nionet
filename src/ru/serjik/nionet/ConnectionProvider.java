@@ -6,22 +6,29 @@ import java.nio.channels.SocketChannel;
 
 public class ConnectionProvider
 {
-	private final static int BUFFER_SIZE = 4096;
-
-	private ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-	private ByteBuffer sendBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-	private BufferReader reader = new BufferReader(BUFFER_SIZE);
+	private ByteBuffer readBuffer;
+	private ByteBuffer sendBuffer;
+	private BufferReader reader;
 
 	private SocketChannel socket;
 
-	private LoopBuffer messages = new LoopBuffer(BUFFER_SIZE * 8);
+	private BufferQueue messages;
 
 	public MessageListener messageListener;
 
-	public ConnectionProvider(SocketChannel socket)
+	public ConnectionProvider(SocketChannel socket, int maxMessageSize, int queueSize)
 	{
 		this.socket = socket;
+		readBuffer = ByteBuffer.allocate(maxMessageSize);
+		sendBuffer = ByteBuffer.allocate(maxMessageSize);
+		reader = new BufferReader(maxMessageSize);
+		messages = new BufferQueue(queueSize);
 		sendBuffer.limit(0);
+	}
+
+	public ConnectionProvider(SocketChannel socket)
+	{
+		this(socket, 4096, 4096 * 8);
 	}
 
 	public void close()
@@ -54,7 +61,7 @@ public class ConnectionProvider
 		{
 			throw new IOException();
 		}
-		
+
 		send();
 	}
 
@@ -94,7 +101,7 @@ public class ConnectionProvider
 
 			while ((size = reader.read(readBuffer)) > 0)
 			{
-				messageListener.onMessage(this, new String(reader.data(), 0, size));
+				messageListener.onMessage(this, reader.data(), size);
 			}
 		}
 

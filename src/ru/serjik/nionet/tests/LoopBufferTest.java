@@ -10,7 +10,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import ru.serjik.nionet.LoopBuffer;
+import ru.serjik.nionet.BufferQueue;
 
 public class LoopBufferTest
 {
@@ -19,7 +19,7 @@ public class LoopBufferTest
 	@Test
 	public void defaults()
 	{
-		LoopBuffer loopBuffer = new LoopBuffer(512);
+		BufferQueue loopBuffer = new BufferQueue(512);
 
 		try
 		{
@@ -46,7 +46,7 @@ public class LoopBufferTest
 	@Test
 	public void hasData()
 	{
-		LoopBuffer loopBuffer = new LoopBuffer(512);
+		BufferQueue loopBuffer = new BufferQueue(512);
 
 		byte[] tmp = new byte[32];
 
@@ -65,7 +65,7 @@ public class LoopBufferTest
 	public void usage()
 	{
 		Queue<byte[]> etalon = new LinkedList<byte[]>();
-		LoopBuffer loopBuffer = new LoopBuffer(30000);
+		BufferQueue loopBuffer = new BufferQueue(30000);
 
 		for (int i = 0; i < 40; i++)
 		{
@@ -114,7 +114,7 @@ public class LoopBufferTest
 	@Test
 	public void speedLoopBuffer()
 	{
-		LoopBuffer loopBuffer = new LoopBuffer(30000);
+		BufferQueue loopBuffer = new BufferQueue(30000);
 		byte[] tmp = new byte[1024];
 
 		// byte[] data = new byte[rnd.nextInt(768) + 32];
