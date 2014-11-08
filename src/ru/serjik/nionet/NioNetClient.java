@@ -11,17 +11,17 @@ public class NioNetClient
 	public static final int STATE_CONNECTED = 2;
 	public static final int STATE_DISCONNECTED = 3;
 
-	private ClientData clientData;
+	private ConnectionProvider connectionProvider;
 	private SocketChannel socket;
 	public int state = STATE_NONE;
 
-	private NioNetClientListener clientListener;
+	private ConnectionListener connectionListener;
 	private String host;
 	private int port;
 
-	public NioNetClient(String host, int port, NioNetClientListener clientListener)
+	public NioNetClient(String host, int port, ConnectionListener connectionListener)
 	{
-		this.clientListener = clientListener;
+		this.connectionListener = connectionListener;
 		this.host = host;
 		this.port = port;
 	}
@@ -42,9 +42,8 @@ public class NioNetClient
 			}
 			catch (IOException e)
 			{
-				//e.printStackTrace();
 				state = STATE_DISCONNECTED;
-				clientListener.onDisconnect();
+				connectionListener.onDisconnect(null);
 			}
 
 		case STATE_CONNECTING:
@@ -52,14 +51,14 @@ public class NioNetClient
 			{
 				if (socket.finishConnect())
 				{
-					clientData = new ClientData(socket);
+					connectionProvider = new ConnectionProvider(socket);
 					state = STATE_CONNECTED;
-					clientListener.onConnect();
+					connectionListener.onConnect(connectionProvider);
 				}
 			}
 			catch (IOException e)
 			{
-				//e.printStackTrace();
+				// e.printStackTrace();
 				state = STATE_DISCONNECTED;
 			}
 			break;
@@ -67,19 +66,12 @@ public class NioNetClient
 		case STATE_CONNECTED:
 			try
 			{
-				if (clientData.recv(clientListener) == false)
-				{
-					state = STATE_DISCONNECTED;
-					clientListener.onDisconnect();
-					break;
-				}
-				clientData.send();
+				connectionProvider.tick(connectionListener);
 			}
 			catch (IOException e)
 			{
-				// e.printStackTrace();
 				state = STATE_DISCONNECTED;
-				clientListener.onDisconnect();
+				connectionListener.onDisconnect(connectionProvider);
 			}
 			break;
 
@@ -87,7 +79,7 @@ public class NioNetClient
 			break;
 		}
 	}
-	
+
 	public void close()
 	{
 		try
@@ -96,7 +88,6 @@ public class NioNetClient
 		}
 		catch (IOException e)
 		{
-			//e.printStackTrace();
 		}
 	}
 
@@ -104,7 +95,7 @@ public class NioNetClient
 	{
 		if (state == STATE_CONNECTED)
 		{
-			clientData.send(message);
+			connectionProvider.send(message);
 		}
 	}
 }

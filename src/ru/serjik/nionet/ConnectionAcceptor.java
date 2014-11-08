@@ -5,11 +5,11 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-public class ClientAcceptor
+public class ConnectionAcceptor
 {
 	private ServerSocketChannel serverSocket = ServerSocketChannel.open();
 
-	public ClientAcceptor(int port) throws IOException
+	public ConnectionAcceptor(int port) throws IOException
 	{
 		serverSocket.socket().bind(new InetSocketAddress(port));
 		serverSocket.configureBlocking(false);

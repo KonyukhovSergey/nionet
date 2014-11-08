@@ -8,32 +8,32 @@ import java.util.List;
 
 public class NioNetServer
 {
-	private List<ClientData> clients = new ArrayList<ClientData>();
-	private ClientAcceptor clientAcceptor;
-	private NioNetServerListener serverListener;
+	private List<ConnectionProvider> connections = new ArrayList<ConnectionProvider>();
+	private ConnectionAcceptor connectionAcceptor;
+	private ConnectionListener connectionListener;
 
-	public NioNetServer(int port, NioNetServerListener serverListener) throws IOException
+	public NioNetServer(int port, ConnectionListener connectionListener) throws IOException
 	{
-		this.serverListener = serverListener;
-		clientAcceptor = new ClientAcceptor(port);
+		this.connectionListener = connectionListener;
+		connectionAcceptor = new ConnectionAcceptor(port);
 	}
 
 	public void stop() throws IOException
 	{
-		clientAcceptor.close();
+		connectionAcceptor.close();
 	}
 
 	public void tick()
 	{
 		try
 		{
-			SocketChannel socketChannel = clientAcceptor.accept();
+			SocketChannel socketChannel = connectionAcceptor.accept();
 
 			if (socketChannel != null)
 			{
-				ClientData client = new ClientData(socketChannel);
-				serverListener.onAccept(client);
-				clients.add(client);
+				ConnectionProvider client = new ConnectionProvider(socketChannel);
+				connectionListener.onConnect(client);
+				connections.add(client);
 			}
 		}
 		catch (IOException e)
@@ -42,33 +42,32 @@ public class NioNetServer
 			// TODO: it is need the decision to be or not to be
 		}
 
-		for (Iterator<ClientData> iterator = clients.iterator(); iterator.hasNext();)
+		for (Iterator<ConnectionProvider> iterator = connections.iterator(); iterator.hasNext();)
 		{
-			ClientData client = iterator.next();
+			ConnectionProvider client = iterator.next();
 
 			try
 			{
-				client.recv(serverListener);
-				client.send();
+				client.tick(connectionListener);
 			}
 			catch (IOException e)
 			{
 				iterator.remove();
-				serverListener.onDisconnect(client);
+				connectionListener.onDisconnect(client);
 			}
 		}
 	}
 
-	public List<ClientData> clients()
+	public List<ConnectionProvider> connections()
 	{
-		return clients;
+		return connections;
 	}
 
 	public void broadcast(String message)
 	{
-		for (ClientData client : clients)
+		for (ConnectionProvider connection : connections)
 		{
-			client.send(message);
+			connection.send(message);
 		}
 	}
 }

@@ -13,24 +13,24 @@ public class BufferWriter
 
 		while (position < size)
 		{
-			int blockLength = size - position;
+			int length = size - position;
 
-			if (blockLength > 255)
+			if (length > 255)
 			{
-				blockLength = 255;
+				length = 255;
 			}
 
-			buffer.put((byte) blockLength);
+			buffer.put((byte) length);
 
 			xor = 0;
 
-			while (blockLength > 0)
+			while (length > 0)
 			{
 				buffer.put(data[position + offset]);
 				xor = (xor ^ (int) (data[position + offset] & 0xff));
 
 				position++;
-				blockLength--;
+				length--;
 			}
 
 			buffer.put((byte) xor);

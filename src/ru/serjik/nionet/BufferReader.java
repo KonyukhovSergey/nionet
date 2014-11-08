@@ -12,7 +12,7 @@ public class BufferReader
 	private int size = 0;
 
 	private int xor = 0;
-	private int blockLength;
+	private int length;
 	private int state = STATE_LENGTH;
 
 	public BufferReader(int capacity)
@@ -34,8 +34,8 @@ public class BufferReader
 			switch (state)
 			{
 			case STATE_LENGTH:
-				blockLength = value;
-				if (blockLength == 0)
+				length = value;
+				if (length == 0)
 				{
 					int result = size;
 					size = 0;
@@ -52,8 +52,8 @@ public class BufferReader
 				data[size] = (byte) value;
 				size++;
 				xor = (xor ^ (int) (value & 0xff));
-				blockLength--;
-				if (blockLength == 0)
+				length--;
+				if (length == 0)
 				{
 					state = STATE_CHECKSUMM;
 				}

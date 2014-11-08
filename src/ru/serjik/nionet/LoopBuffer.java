@@ -1,64 +1,126 @@
 package ru.serjik.nionet;
 
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 
 public class LoopBuffer
 {
 	private byte[] buffer;
 
-	private int readPosition = 0;
-	private int writePosition = 0;
-	private int dequeuePosition = 0;
+	private int readed = 0;
+	private int writed = 0;
+	private int used = 0;
 
 	public LoopBuffer(int maximumCapacity)
 	{
 		buffer = new byte[maximumCapacity];
 	}
 
-	public void enqueue(byte[] data, int offset, int size)
+	public void enqueue(byte[] data, int offset, int length)
 	{
-		if (buffer.length - writePosition < size)
-		{
-			writePosition = 0;
-			
-			if (readPosition - writePosition < size)
-			{
-				throw new BufferOverflowException();
-			}
-		}
+		write(length);
+		ensureWrite(length);
+		System.arraycopy(data, offset, buffer, writed, length);
+		writed += length;
 	}
 
-	public int dequeue()
+	public void enqueue(byte[] data, int length)
 	{
-		return 0;
+		enqueue(data, 0, length);
 	}
 
-	public int offset()
+	public void enqueue(byte[] data)
 	{
-		return dequeuePosition;
+		enqueue(data, 0, data.length);
 	}
 
-	public byte[] data()
+	public int dequeue(byte[] buffer, int offset)
 	{
-		return buffer;
+		int length = readInt();
+		ensureRead(length);
+		System.arraycopy(this.buffer, readed, buffer, offset, length);
+		readed += length;
+		return length;
+	}
+
+	public void dequeue(ByteBuffer buffer)
+	{
+		int length = readInt();
+		ensureRead(length);
+		BufferWriter.write(buffer, this.buffer, readed, length);
+		readed += length;
+	}
+
+	public int dequeue(byte[] buffer)
+	{
+		return dequeue(buffer, 0);
+	}
+
+	public byte[] dequeue()
+	{
+		int length = readInt();
+		ensureRead(length);
+		byte[] data = new byte[length];
+		System.arraycopy(this.buffer, readed, data, 0, length);
+		readed += length;
+		return data;
 	}
 
 	private void write(int value)
 	{
-		buffer[writePosition++] = (byte) (value & 0xff);
+		ensureWrite(4);
+		buffer[writed++] = (byte) (value & 0xff);
 		value >>= 8;
-		buffer[writePosition++] = (byte) (value & 0xff);
+		buffer[writed++] = (byte) (value & 0xff);
 		value >>= 8;
-		buffer[writePosition++] = (byte) (value & 0xff);
+		buffer[writed++] = (byte) (value & 0xff);
 		value >>= 8;
-		buffer[writePosition++] = (byte) value;
+		buffer[writed++] = (byte) value;
 	}
 
 	private int readInt()
 	{
-		int value = (buffer[readPosition + 3] << 24) | (buffer[readPosition + 2] << 16)
-				| (buffer[readPosition + 1] << 8) | (buffer[readPosition + 0]);
-		readPosition += 4;
+		ensureRead(4);
+		int value = buffer[readed + 3] & 0xFF << 24 | (buffer[readed + 2] & 0xFF) << 16
+				| (buffer[readed + 1] & 0xFF) << 8 | (buffer[readed + 0] & 0xFF);
+		readed += 4;
 		return value;
+	}
+
+	private void ensureWrite(int length)
+	{
+		if (writed + length > buffer.length)
+		{
+			used += buffer.length - writed;
+			writed = 0;
+		}
+
+		if (used + length > buffer.length)
+		{
+			throw new BufferOverflowException();
+		}
+
+		used += length;
+	}
+
+	private void ensureRead(int length)
+	{
+		if (readed + length > buffer.length)
+		{
+			used -= buffer.length - readed;
+			readed = 0;
+		}
+
+		if (used < length)
+		{
+			throw new BufferUnderflowException();
+		}
+		used -= length;
+	}
+
+	public boolean hasData()
+	{
+		return used > 0;
 	}
 }
