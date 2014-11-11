@@ -51,8 +51,23 @@ public class ConnectionProvider
 	{
 		if (message != null)
 		{
-			messages.enqueue(message.getBytes());
+			send(message.getBytes());
 		}
+	}
+
+	public void send(byte[] buffer, int offset, int length)
+	{
+		messages.enqueue(buffer, offset, length);
+	}
+
+	public void send(byte[] data, int size)
+	{
+		messages.enqueue(data, 0, size);
+	}
+
+	public void send(byte[] data)
+	{
+		messages.enqueue(data, 0, data.length);
 	}
 
 	public void tick(ConnectionListener messageListener) throws IOException

@@ -25,15 +25,15 @@ public class BufferQueue
 		writed += length;
 	}
 
-	public void enqueue(byte[] data, int length)
-	{
-		enqueue(data, 0, length);
-	}
-
-	public void enqueue(byte[] data)
-	{
-		enqueue(data, 0, data.length);
-	}
+	// public void enqueue(byte[] data, int length)
+	// {
+	// enqueue(data, 0, length);
+	// }
+	//
+	// public void enqueue(byte[] data)
+	// {
+	// enqueue(data, 0, data.length);
+	// }
 
 	public int dequeue(byte[] buffer, int offset)
 	{
@@ -82,7 +82,7 @@ public class BufferQueue
 	private int readInt()
 	{
 		ensureRead(4);
-		int value = buffer[readed + 3] & 0xFF << 24 | (buffer[readed + 2] & 0xFF) << 16
+		int value = (buffer[readed + 3] & 0xFF) << 24 | (buffer[readed + 2] & 0xFF) << 16
 				| (buffer[readed + 1] & 0xFF) << 8 | (buffer[readed + 0] & 0xFF);
 		readed += 4;
 		return value;

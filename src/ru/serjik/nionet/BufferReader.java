@@ -29,7 +29,7 @@ public class BufferReader
 	{
 		while (buffer.remaining() > 0)
 		{
-			int value = buffer.get();
+			int value = buffer.get() & 0xff;
 
 			switch (state)
 			{
