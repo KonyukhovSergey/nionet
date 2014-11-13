@@ -87,7 +87,7 @@ public class ConnectionProvider
 			socket.write(sendBuffer);
 		}
 
-		if (sendBuffer.hasRemaining() == false && messages.hasData())
+		while (sendBuffer.hasRemaining() == false && messages.hasData())
 		{
 			messages.dequeue(sendBuffer);
 			socket.write(sendBuffer);
