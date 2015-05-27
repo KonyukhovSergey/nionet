@@ -45,6 +45,7 @@ public class NioNetClient
 				state = STATE_DISCONNECTED;
 				connectionListener.onDisconnect(null);
 			}
+			break;
 
 		case STATE_CONNECTING:
 			try
