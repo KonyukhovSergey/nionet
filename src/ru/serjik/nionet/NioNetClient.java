@@ -26,7 +26,7 @@ public class NioNetClient
 		this.port = port;
 	}
 
-	public void tick()
+	public boolean tick()
 	{
 		switch (state)
 		{
@@ -42,8 +42,7 @@ public class NioNetClient
 			}
 			catch (IOException e)
 			{
-				state = STATE_DISCONNECTED;
-				connectionListener.onDisconnect(null);
+				diconnected();
 			}
 			break;
 
@@ -52,51 +51,49 @@ public class NioNetClient
 			{
 				if (socket.finishConnect())
 				{
-					connectionProvider = new ConnectionProvider(socket);
+					connectionProvider = new ConnectionProvider(socket, connectionListener);
 					state = STATE_CONNECTED;
 					connectionListener.onConnect(connectionProvider);
 				}
 			}
 			catch (IOException e)
 			{
-				// e.printStackTrace();
-				state = STATE_DISCONNECTED;
+				diconnected();
 			}
 			break;
 
 		case STATE_CONNECTED:
 			try
 			{
-				connectionProvider.tick(connectionListener);
+				connectionProvider.tick();
 			}
 			catch (IOException e)
 			{
-				state = STATE_DISCONNECTED;
-				connectionListener.onDisconnect(connectionProvider);
+				diconnected();
 			}
 			break;
 
 		case STATE_DISCONNECTED:
-			break;
+			return false;
 		}
+		return true;
+	}
+
+	private void diconnected()
+	{
+		state = STATE_DISCONNECTED;
+		connectionListener.onDisconnect(connectionProvider);
 	}
 
 	public void close()
 	{
 		try
 		{
+			diconnected();
 			socket.close();
 		}
 		catch (IOException e)
 		{
-		}
-	}
-
-	public void send(String message)
-	{
-		if (state == STATE_CONNECTED)
-		{
-			connectionProvider.send(message);
 		}
 	}
 }

@@ -16,9 +16,10 @@ public class ConnectionProvider
 
 	public MessageListener messageListener;
 
-	public ConnectionProvider(SocketChannel socket, int maxMessageSize, int queueSize)
+	public ConnectionProvider(SocketChannel socket, int maxMessageSize, int queueSize, MessageListener messageListener)
 	{
 		this.socket = socket;
+		this.messageListener = messageListener;
 		readBuffer = ByteBuffer.allocate(maxMessageSize);
 		sendBuffer = ByteBuffer.allocate(maxMessageSize);
 		reader = new BufferReader(maxMessageSize);
@@ -26,9 +27,9 @@ public class ConnectionProvider
 		sendBuffer.limit(0);
 	}
 
-	public ConnectionProvider(SocketChannel socket)
+	public ConnectionProvider(SocketChannel socket, MessageListener messageListener)
 	{
-		this(socket, 4096, 4096 * 8);
+		this(socket, 4096, 4096 * 8, messageListener);
 	}
 
 	public void close()
@@ -47,14 +48,6 @@ public class ConnectionProvider
 		return socket.isOpen();
 	}
 
-	public void send(String message)
-	{
-		if (message != null)
-		{
-			send(message.getBytes());
-		}
-	}
-
 	public void send(byte[] buffer, int offset, int length)
 	{
 		messages.enqueue(buffer, offset, length);
@@ -70,13 +63,9 @@ public class ConnectionProvider
 		messages.enqueue(data, 0, data.length);
 	}
 
-	public void tick(ConnectionListener messageListener) throws IOException
+	public void tick() throws IOException
 	{
-		if (false == recv(messageListener))
-		{
-			throw new IOException();
-		}
-
+		recv();
 		send();
 	}
 
@@ -94,7 +83,7 @@ public class ConnectionProvider
 		}
 	}
 
-	private boolean recv(ConnectionListener messageListener) throws IOException
+	private void recv() throws IOException
 	{
 		readBuffer.clear();
 
@@ -103,7 +92,7 @@ public class ConnectionProvider
 		if (count == -1)
 		{
 			socket.close();
-			return false;
+			throw new IOException();
 		}
 
 		readBuffer.flip();
@@ -119,7 +108,5 @@ public class ConnectionProvider
 				messageListener.onMessage(this, reader.data(), size);
 			}
 		}
-
-		return true;
 	}
 }

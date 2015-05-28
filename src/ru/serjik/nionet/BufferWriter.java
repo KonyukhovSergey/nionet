@@ -41,6 +41,5 @@ public class BufferWriter
 		buffer.position(0);
 
 		return buffer.position();
-
 	}
 }

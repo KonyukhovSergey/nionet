@@ -25,16 +25,6 @@ public class BufferQueue
 		writed += length;
 	}
 
-	// public void enqueue(byte[] data, int length)
-	// {
-	// enqueue(data, 0, length);
-	// }
-	//
-	// public void enqueue(byte[] data)
-	// {
-	// enqueue(data, 0, data.length);
-	// }
-
 	public int dequeue(byte[] buffer, int offset)
 	{
 		int length = readInt();

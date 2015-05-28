@@ -23,7 +23,7 @@ public class NioNetServer
 		connectionAcceptor.close();
 	}
 
-	public void tick()
+	public boolean tick()
 	{
 		try
 		{
@@ -31,43 +31,30 @@ public class NioNetServer
 
 			if (socketChannel != null)
 			{
-				ConnectionProvider client = new ConnectionProvider(socketChannel);
+				ConnectionProvider client = new ConnectionProvider(socketChannel, connectionListener);
 				connectionListener.onConnect(client);
 				connections.add(client);
 			}
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
-			// TODO: it is need the decision to be or not to be
+			return false;
 		}
 
 		for (Iterator<ConnectionProvider> iterator = connections.iterator(); iterator.hasNext();)
 		{
-			ConnectionProvider client = iterator.next();
+			ConnectionProvider connection = iterator.next();
 
 			try
 			{
-				client.tick(connectionListener);
+				connection.tick();
 			}
 			catch (IOException e)
 			{
 				iterator.remove();
-				connectionListener.onDisconnect(client);
+				connectionListener.onDisconnect(connection);
 			}
 		}
-	}
-
-	public List<ConnectionProvider> connections()
-	{
-		return connections;
-	}
-
-	public void broadcast(String message)
-	{
-		for (ConnectionProvider connection : connections)
-		{
-			connection.send(message);
-		}
+		return true;
 	}
 }
